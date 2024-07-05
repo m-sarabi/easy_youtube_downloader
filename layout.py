@@ -41,51 +41,52 @@ class Layout:
                     ],
                     [sg.HorizontalSeparator()],
                     [
-                        sg.Column([
-                            [sg.Text('Video details:', font=('Helvetica', 12, 'bold'))],
-                            [
-                                sg.Text('Resolution:', size=(15, 1)),
-                                sg.Text('', size=(15, 1), key='-RESOLUTION-')
-                            ],
-                            [
-                                sg.Text('Frame Rate:', size=(15, 1)),
-                                sg.Text('', size=(15, 1), key='-FRAMERATE-')
-                            ],
-                            [
-                                sg.Text('Size:', size=(15, 1)),
-                                sg.Text('', size=(15, 1), key='-VSIZE-')
-                            ],
-                            [
-                                sg.Text('Bitrate:', size=(15, 1)),
-                                sg.Text('', size=(15, 1), key='-VBITRATE-')
-                            ],
-                            [
-                                sg.Text('Codec:', size=(15, 1)),
-                                sg.Text('', size=(15, 1), key='-VCODEC-')
-                            ]
+                        sg.Frame('Video details', [
+                            [sg.Column([
+                                [
+                                    sg.Text('Resolution:', size=(15, 1)),
+                                    sg.Text('', size=(15, 1), key='-RESOLUTION-')
+                                ],
+                                [
+                                    sg.Text('Frame Rate:', size=(15, 1)),
+                                    sg.Text('', size=(15, 1), key='-FRAMERATE-')
+                                ],
+                                [
+                                    sg.Text('Size:', size=(15, 1)),
+                                    sg.Text('', size=(15, 1), key='-VSIZE-')
+                                ],
+                                [
+                                    sg.Text('Bitrate:', size=(15, 1)),
+                                    sg.Text('', size=(15, 1), key='-VBITRATE-')
+                                ],
+                                [
+                                    sg.Text('Codec:', size=(15, 1)),
+                                    sg.Text('', size=(15, 1), key='-VCODEC-')
+                                ]], size=(268, 130))]
                         ], vertical_alignment='top')
                         ,
                         sg.VerticalSeparator(),
-                        sg.Column([
-                            [sg.Text('Audio details:', font=('Helvetica', 12, 'bold'))],
-                            [
-                                sg.Text('Size:', size=(15, 1)),
-                                sg.Text('', size=(15, 1), key='-ASIZE-')
-                            ],
-                            [
-                                sg.Text('Bitrate:', size=(15, 1)),
-                                sg.Text('', size=(15, 1), key='-ABITRATE-')
-                            ],
-                            [
-                                sg.Text('Codec:', size=(15, 1)),
-                                sg.Text('', size=(15, 1), key='-ACODEC-')
-                            ]
+                        sg.Frame('Audio details', [
+                            [sg.Column([
+                                [
+                                    sg.Text('Size:', size=(15, 1)),
+                                    sg.Text('', size=(15, 1), key='-ASIZE-')
+                                ],
+                                [
+                                    sg.Text('Bitrate:', size=(15, 1)),
+                                    sg.Text('', size=(15, 1), key='-ABITRATE-')
+                                ],
+                                [
+                                    sg.Text('Codec:', size=(15, 1)),
+                                    sg.Text('', size=(15, 1), key='-ACODEC-')
+                                ]], size=(268, 130))]
                         ], vertical_alignment='top')
                     ]
                 ], vertical_alignment='top'),
+
                 sg.VerticalSeparator(),
-                sg.Column([
-                    [sg.Text('Video Information:', font=('Helvetica', 14, 'bold'))],
+                sg.Frame("Video Information", [
+                    # [sg.Text('Video Information:', font=('Helvetica', 14, 'bold'))],
                     [sg.Text('Title:'), sg.Text('', size=(30, 1), key='-TITLE-')],
                     [sg.Text('Duration:'), sg.Text('', size=(30, 1), key='-DURATION-')],
                     [sg.Text('Release Time:'), sg.Text('', size=(30, 1), key='-RELEASE-')],
