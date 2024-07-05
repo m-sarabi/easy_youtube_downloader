@@ -17,14 +17,13 @@ def create_about_window():
 def fetch_video_info(url):
     video = Video(url)
     if video.status != 'Success':
-        # show an error popup
         main_window.write_event_value('-FORMATS-', (None, video.status, None))
-        return
-    vfs = video.get_video_formats()
-    vfs = {name: value for name, value in zip(video_format_to_str(vfs), vfs)}
-    afs = video.get_audio_formats()
-    afs = {name: value for name, value in zip(audio_format_to_str(afs), afs)}
-    main_window.write_event_value('-FORMATS-', (vfs, afs, video.video_details()))
+    else:
+        vfs = video.get_video_formats()
+        vfs = {name: value for name, value in zip(video_format_to_str(vfs), vfs)}
+        afs = video.get_audio_formats()
+        afs = {name: value for name, value in zip(audio_format_to_str(afs), afs)}
+        main_window.write_event_value('-FORMATS-', (vfs, afs, video.video_details()))
 
 
 def video_format_to_str(vfs):
@@ -108,6 +107,7 @@ while True:
             url = values['-URL-']
             if url:
                 threading.Thread(target=fetch_video_info, args=(url,), daemon=True).start()
+                main_window['Check'].update(disabled=True)
         # get the selected video and audio format on change
         elif event == '-VIDEO-' or event == '-AUDIO-':
             if event == '-VIDEO-':
@@ -123,6 +123,7 @@ while True:
                 sg.popup_error(f'\n{audio_formats}\n')
                 continue
             if video_formats and audio_formats:
+                main_window['Check'].update(disabled=False)
                 window['-VIDEO-'].update(values=list(video_formats.keys()), disabled=False, )
                 window['-AUDIO-'].update(values=list(audio_formats.keys()), disabled=False, )
 
