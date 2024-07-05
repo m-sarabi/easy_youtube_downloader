@@ -16,7 +16,6 @@ def create_about_window():
 
 def fetch_video_info(url):
     video = Video(url)
-    print(video.status)
     if video.status != 'Success':
         # show an error popup
         main_window.write_event_value('-FORMATS-', (None, video.status, None))
@@ -117,7 +116,6 @@ while True:
                 audio_id = update_info_boxes('audio')
 
             if video_id and audio_id:
-                print(video_id, audio_id)
                 main_window['Download'].update(disabled=False)
         elif event == '-FORMATS-':
             video_formats, audio_formats, video_details = values['-FORMATS-']
@@ -131,7 +129,6 @@ while True:
                 window['-TITLE-'].update(value=video_details['title'])
                 window['-DURATION-'].update(value=video_details['duration'])
                 window['-RELEASE-'].update(value=video_details['timestamp'])
-                print(video_details['thumbnail'])
                 img = Image.open(urllib.request.urlretrieve(video_details['thumbnail'])[0])
                 img.thumbnail((300, 200))
                 window['-THUMBNAIL-'].update(data=ImageTk.PhotoImage(img))
