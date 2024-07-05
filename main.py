@@ -69,13 +69,13 @@ def progress_hook(d):
         main_window['Download'].update(disabled=False)
         main_window['-STATUS-'].update(value="Done!")
     elif d['status'] == 'downloading':
-        total_bytes = d['total_bytes'] if d['total_bytes'] \
+        total_bytes = d['total_bytes'] if d.get('total_bytes') \
             else d['total_bytes_estimate'] \
-            if d['total_bytes_estimate'] else None
-        downloaded_bytes = d['downloaded_bytes'] if d['downloaded_bytes'] else None
+            if d.get('total_bytes_estimate') else None
+        downloaded_bytes = d['downloaded_bytes'] if d.get('downloaded_bytes') else None
         percentage = round(downloaded_bytes / total_bytes * 100) if total_bytes else None
         percentage_str = f"{percentage}%" if percentage else None
-        speed = convert_file_size(d['speed']) + "/s" if d['speed'] else None
+        speed = convert_file_size(d['speed']) + "/s" if d.get('speed') else None
         main_window['-PROGRESS-'].update(current_count=percentage)
         stats = " | ".join([str(_) for _ in [speed, percentage_str] if _])
         main_window['-STATUS-'].update(value=stats)
