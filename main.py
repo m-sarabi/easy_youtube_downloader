@@ -58,6 +58,7 @@ class YoutubeDownloaderApp:
         self.threads_label = tk.Label(self.root, text="Number of Threads:")
         self.threads_label.grid(row=3, column=0, sticky='e', padx=5, pady=5)
         self.threads_entry = tk.Entry(self.root, width=5)
+        self.threads_entry.insert(0, '1')
         self.threads_entry.grid(row=3, column=1, padx=5, pady=5)
 
         self.path_label = tk.Label(self.root, text="Download Path:")
