@@ -96,13 +96,3 @@ class Video:
 
         with YoutubeDL(ydl_opts) as ydl:
             ydl.download([self.url])
-
-
-if __name__ == "__main__":
-    video = Video('https://www.youtube.com/watch?v=CSEHMLUcbpk')
-    # video = Video('https://www.minecraft.com/watch?v=0SEHMLUcbpk')
-    # print("info: ", video.info_dict)
-    # print(video.get_audio_formats())
-    # print(video.get_video_formats())
-    print(video.video_details())
-    # video.download('139', '134', "c:/Users/MSarabi/Downloads/")
