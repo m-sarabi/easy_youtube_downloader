@@ -81,7 +81,7 @@ class Video:
                 'VCodec': f.get('vcodec'),
                 'Size': (convert_file_size(f.get('filesize'))
                          if f.get('filesize')
-                         else approximate_filesize(f.get('tbr'), self.info_dict.get('duration'))),
+                         else f"≈ {approximate_filesize(f.get('tbr'), self.info_dict.get('duration'))}"),
             })
         return formats
 
