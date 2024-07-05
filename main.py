@@ -77,7 +77,6 @@ class YoutubeDownloaderApp:
         self.progress_bar.grid(row=5, column=2, padx=5, pady=5)
         self.status_label = tk.Label(self.root, text="")
         self.status_label.grid(row=6, column=2, padx=5, pady=5)
-        self.status_label.config(text="Some text here")
 
         self.video_details_frame = ttk.LabelFrame(self.root, text="Video details")
         self.video_details_frame.grid(row=7, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
