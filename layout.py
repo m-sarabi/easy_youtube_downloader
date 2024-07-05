@@ -87,7 +87,7 @@ class Layout:
                 sg.VerticalSeparator(),
                 sg.Frame("Video Information", [
                     # [sg.Text('Video Information:', font=('Helvetica', 14, 'bold'))],
-                    [sg.Text('Title:'), sg.Text('', size=(30, 1), key='-TITLE-')],
+                    [sg.Text('Title:'), sg.Text('', size=(30, 3), key='-TITLE-')],
                     [sg.Text('Duration:'), sg.Text('', size=(30, 1), key='-DURATION-')],
                     [sg.Text('Release Time:'), sg.Text('', size=(30, 1), key='-RELEASE-')],
                     [sg.Text('Thumbnail:')],
