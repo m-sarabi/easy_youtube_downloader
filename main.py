@@ -304,17 +304,21 @@ For updates, check the GitHub page.
         video_format = self.video_id
         audio_format = self.audio_id
 
-        if not url or not path or not threads or not video_format or not audio_format:
+        if not all([url, path, threads, video_format, audio_format]):
             messagebox.showerror("Error", "Please fill all the fields")
             return
 
         try:
             threads = int(threads)
+            if threads < 1:
+                messagebox.showerror("Error", "Threads must be greater than 0")
+                return
         except ValueError:
             messagebox.showerror("Error", "Threads must be a number")
             return
 
         self.download_button.config(state='disabled')
+        self.check_button.config(state='disabled')
 
         def download_thread():
             video = Video(url)
@@ -326,6 +330,7 @@ For updates, check the GitHub page.
 
     def download_complete(self):
         self.download_button.config(state='normal')
+        self.check_button.config(state='normal')
         messagebox.showinfo("Download Complete", "The video has been downloaded successfully")
 
 
