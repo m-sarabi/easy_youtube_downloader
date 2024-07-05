@@ -1,3 +1,4 @@
+import textwrap
 import PySimpleGUI as sg
 import threading
 import urllib.request
@@ -127,7 +128,7 @@ while True:
                 window['-VIDEO-'].update(values=list(video_formats.keys()), disabled=False, )
                 window['-AUDIO-'].update(values=list(audio_formats.keys()), disabled=False, )
 
-                window['-TITLE-'].update(value=video_details['title'])
+                window['-TITLE-'].update(textwrap.fill(video_details['title']))
                 window['-DURATION-'].update(value=video_details['duration'])
                 window['-RELEASE-'].update(value=video_details['timestamp'])
                 img = Image.open(urllib.request.urlretrieve(video_details['thumbnail'])[0])
