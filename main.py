@@ -1,16 +1,18 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, simpledialog
 from threading import Thread
 from PIL import Image, ImageTk
 import urllib.request
 from utils import convert_file_size
 from video import Video
 import traceback
+import webbrowser
 
 
 class YoutubeDownloaderApp:
     def __init__(self, root):
         self.root = root
+        self.root.resizable(False, False)
         self.root.title("EasyYoutubeDownloader")
         self.video_formats = {}
         self.audio_formats = {}
@@ -157,7 +159,43 @@ class YoutubeDownloaderApp:
             self.path_entry.config(state='readonly')
 
     def create_about_window(self):
-        messagebox.showinfo("About", "Youtube Downloader using Tkinter")
+        about_window = tk.Toplevel(self.root)
+        about_window.title("About")
+        about_window.geometry("300x400")
+        about_window.resizable(False, False)
+        # focus on the window
+        about_window.attributes("-topmost", True)
+        about_title_label = tk.Label(about_window, text="EasyYoutubeDownloader", font=("Arial", 16))
+        about_title_label.pack(padx=5, pady=10)
+        about_text = """
+YouTube Downloader lets you easily download YouTube videos. It helps you choose and download audio and video formats, showing you a preview with the title, duration, upload date, and thumbnail.
+Features:
+- Download audio and video combined.
+- Choose different video and audio formats.
+- Preview video details before downloading.
+Platforms:
+- Currently for PC
+Developer:
+Made by Mohammad Sarabi.
+GitHub: https://github.com/m-sarabi
+Telegram: @MSarabi
+Version:
+- Version 1.0 (first release, may have bugs)
+For updates, check the GitHub page.
+        """.strip()
+        about_desc_label = tk.Label(about_window, text=about_text, justify='left', wraplength=250, padx=5, pady=5)
+        about_desc_label.pack()
+
+        def github_command():
+            webbrowser.open("https://github.com/m-sarabi/easy_youtube_downloader")
+            about_window.destroy()
+
+        github_button = tk.Button(about_window, text="GitHub", command=github_command, padx=5, pady=5)
+        github_button.pack(side='left', padx=5, pady=5)
+
+        ok_button = tk.Button(about_window, text="Close", command=about_window.destroy, padx=5, pady=5)
+        ok_button.pack(side='right', padx=5, pady=5)
+        about_window.focus_force()
 
     def check_url(self):
         self.check_button.config(state='disabled')
