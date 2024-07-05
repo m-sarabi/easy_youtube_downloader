@@ -317,6 +317,7 @@ For updates, check the GitHub page.
 
         def download_thread():
             video = Video(url)
+            video.threads = threads
             video.download(video_format, audio_format, path, progress_hook)
             self.download_complete()
 
