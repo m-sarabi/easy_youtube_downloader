@@ -1,8 +1,6 @@
 import random
 import string
-
 from yt_dlp import YoutubeDL
-
 from utils import *
 
 
@@ -26,7 +24,6 @@ class Video:
             self.status = "Success"
             return info
         except Exception as e:
-            print(e)
             if "Read timed out" in str(e):
                 self.status = "Error: timed out"
             elif "Video unavailable" in str(e):
@@ -38,7 +35,7 @@ class Video:
                 print(self.status)
             else:
                 self.status = "Error"
-            return None
+            raise e
 
     def get_formats(self):
         return self.info_dict.get('formats', [])
