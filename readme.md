@@ -5,7 +5,7 @@ EasyYoutubeDownloader is a user-friendly desktop application built with Tkinter 
 ## Features
 - **Check YouTube URL:** Verify the validity of the YouTube URL and fetch available video and audio formats.
 - **Select Formats:** Choose from various video and audio formats for downloading.
-- **Multiple Threads:** Set the number of threads for downloading, allowing for faster downloads.
+- **Multiple Threads:** Set the number of threads for downloading, allowing faster downloads.
 - **Download Path Selection:** Easily select the folder where you want to save the downloaded files.
 - **Video Information:** Display detailed information about the video including title, duration, release time, and thumbnail.
 - **Progress Tracking:** Track the download progress with a progress bar.
@@ -23,9 +23,21 @@ EasyYoutubeDownloader is a user-friendly desktop application built with Tkinter 
 - Convert audio to desired format using ffmpeg
 
 ## Screenshots
+<table>
+  <tr>
+    <td>
+      
+![image](https://github.com/m-sarabi/easy_youtube_downloader/assets/74133927/b2128c0c-9cb7-4a35-9bba-9345020b5136)
+    </td>
+    <td>
+    
+![image](https://github.com/m-sarabi/easy_youtube_downloader/assets/74133927/d9a66a67-a39f-4484-bb74-e9aa9c390926)
+    </td>
+  </tr>
+</table>
 
 ## License
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/m-sarabi/easy_youtube_downloader/blob/main/LICENSE) file for details.
 
 ## Acknowledgements
 - This project uses the yt-dlp library for handling YouTube downloads.
@@ -33,6 +45,6 @@ This project is licensed under the MIT License. See the LICENSE file for details
 - The Pillow library is used for image processing.
 
 ## Contact
-For any questions or feedback, please open an issue on GitHub or contact me on:
+For any questions or feedback, please open an issue on GitHub or contact me at:
 - Telegram
 - Discord
