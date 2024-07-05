@@ -14,7 +14,7 @@ def create_about_window():
     return wnd
 
 
-def fetch_formats_thread(url):
+def fetch_video_info(url):
     video = Video(url)
     print(video.status)
     if video.status != 'Success':
@@ -52,8 +52,9 @@ def update_info_boxes(mode):
         return audio_formats[values['-AUDIO-']]['ID']
 
 
-def download_video(video_id, audio_id, path, progress_hook):
+def download_video(video_id, audio_id, path, progress_hook, threads):
     video = Video(url)
+    video.threads = threads
     try:
         video.download(video_id, audio_id, path, progress_hook)
     except Exception as e:
@@ -107,7 +108,7 @@ while True:
         elif event == 'Check':
             url = values['-URL-']
             if url:
-                threading.Thread(target=fetch_formats_thread, args=(url,), daemon=True).start()
+                threading.Thread(target=fetch_video_info, args=(url,), daemon=True).start()
         # get the selected video and audio format on change
         elif event == '-VIDEO-' or event == '-AUDIO-':
             if event == '-VIDEO-':
@@ -141,10 +142,8 @@ while True:
             threads = int(values['-THREADS-'])
             download_path = values['-PATH-']
             if url and video_id and audio_id and download_path and threads > 0:
-                video = Video(url)
-                video.threads = threads
-                threading.Thread(target=video.download,
-                                 args=(video_id, audio_id, download_path, progress_hook),
+                threading.Thread(target=download_video,
+                                 args=(video_id, audio_id, download_path, progress_hook, threads),
                                  daemon=True).start()
                 if program_status == 'idle':
                     main_window['Check'].update(disabled=True)
