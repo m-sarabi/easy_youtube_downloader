@@ -1,178 +1,295 @@
-import textwrap
-import PySimpleGUI as sg
-import threading
-import urllib.request
+import tkinter as tk
+from tkinter import ttk, filedialog, messagebox
+from threading import Thread
 from PIL import Image, ImageTk
+import urllib.request
 from utils import convert_file_size
-
 from video import Video
-from layout import Layout
+import traceback
 
 
-def create_about_window():
-    wnd = sg.Window('About', layouts.about_window_layout, modal=True, finalize=True)
-    wnd.bind('<Escape>', '-ESCAPE-')
-    return wnd
+class YoutubeDownloaderApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("EasyYoutubeDownloader")
+        self.video_formats = {}
+        self.audio_formats = {}
+        self.video_id = None
+        self.audio_id = None
+        self.program_status = 'idle'
+        self.downloaded_parts = 0
+
+        # Create the main layout
+        self.create_main_layout()
+
+    def create_main_layout(self):
+        menu = tk.Menu(self.root)
+        self.root.config(menu=menu)
+
+        file_menu = tk.Menu(menu, tearoff=0)
+        menu.add_cascade(label="File", menu=file_menu)
+        file_menu.add_command(label="Exit", command=self.root.quit)
+
+        help_menu = tk.Menu(menu, tearoff=0)
+        menu.add_cascade(label="Help", menu=help_menu)
+        help_menu.add_command(label="About", command=self.create_about_window)
+
+        self.url_label = tk.Label(self.root, text="YouTube URL:")
+        self.url_label.grid(row=0, column=0, sticky='e', padx=5, pady=5)
+        self.url_entry = tk.Entry(self.root, width=45)
+        self.url_entry.grid(row=0, column=1, padx=5, pady=5)
+        self.check_button = tk.Button(self.root, text="Check", command=self.check_url)
+        self.check_button.grid(row=0, column=2, padx=5, pady=5)
+
+        self.video_label = tk.Label(self.root, text="Video Format:")
+        self.video_label.grid(row=1, column=0, sticky='e', padx=5, pady=5)
+        self.video_combo = ttk.Combobox(self.root, state='readonly', width=45)
+        self.video_combo.grid(row=1, column=1, padx=5, pady=5)
+        self.video_combo.bind('<<ComboboxSelected>>', self.update_video_info)
+
+        self.audio_label = tk.Label(self.root, text="Audio Format:")
+        self.audio_label.grid(row=2, column=0, sticky='e', padx=5, pady=5)
+        self.audio_combo = ttk.Combobox(self.root, state='readonly', width=45)
+        self.audio_combo.grid(row=2, column=1, padx=5, pady=5)
+        self.audio_combo.bind('<<ComboboxSelected>>', self.update_audio_info)
+
+        self.threads_label = tk.Label(self.root, text="Number of Threads:")
+        self.threads_label.grid(row=3, column=0, sticky='e', padx=5, pady=5)
+        self.threads_entry = tk.Entry(self.root, width=5)
+        self.threads_entry.grid(row=3, column=1, padx=5, pady=5)
+
+        self.path_label = tk.Label(self.root, text="Download Path:")
+        self.path_label.grid(row=4, column=0, sticky='e', padx=5, pady=5)
+        self.path_entry = tk.Entry(self.root, width=45, state='readonly')
+        self.path_entry.grid(row=4, column=1, padx=5, pady=5)
+        self.path_button = tk.Button(self.root, text="Browse", command=self.browse_folder)
+        self.path_button.grid(row=4, column=2, padx=5, pady=5)
+
+        self.download_label = tk.Label(self.root, text="Download:")
+        self.download_label.grid(row=5, column=0, sticky='e', padx=5, pady=5)
+        self.download_button = tk.Button(self.root, text="Download", command=self.download, state='disabled')
+        self.download_button.grid(row=5, column=1, padx=5, pady=5)
+
+        self.progress_bar = ttk.Progressbar(self.root, orient='horizontal', length=300, mode='determinate')
+        self.progress_bar.grid(row=5, column=2, padx=5, pady=5)
+        self.status_label = tk.Label(self.root, text="")
+        self.status_label.grid(row=6, column=2, padx=5, pady=5)
+        self.status_label.config(text="Some text here")
+
+        self.video_details_frame = ttk.LabelFrame(self.root, text="Video details")
+        self.video_details_frame.grid(row=7, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
+        self.video_details_frame.grid_columnconfigure(1, weight=1)
+
+        self.resolution_label = tk.Label(self.video_details_frame, text="Resolution:")
+        self.resolution_label.grid(row=0, column=0, sticky='e', padx=5, pady=2)
+        self.resolution_value = tk.Label(self.video_details_frame, text="")
+        self.resolution_value.grid(row=0, column=1, sticky='w', padx=5, pady=2)
+
+        self.framerate_label = tk.Label(self.video_details_frame, text="Frame Rate:")
+        self.framerate_label.grid(row=1, column=0, sticky='e', padx=5, pady=2)
+        self.framerate_value = tk.Label(self.video_details_frame, text="")
+        self.framerate_value.grid(row=1, column=1, sticky='w', padx=5, pady=2)
+
+        self.vsize_label = tk.Label(self.video_details_frame, text="Size:")
+        self.vsize_label.grid(row=2, column=0, sticky='e', padx=5, pady=2)
+        self.vsize_value = tk.Label(self.video_details_frame, text="")
+        self.vsize_value.grid(row=2, column=1, sticky='w', padx=5, pady=2)
+
+        self.vbitrate_label = tk.Label(self.video_details_frame, text="Bitrate:")
+        self.vbitrate_label.grid(row=3, column=0, sticky='e', padx=5, pady=2)
+        self.vbitrate_value = tk.Label(self.video_details_frame, text="")
+        self.vbitrate_value.grid(row=3, column=1, sticky='w', padx=5, pady=2)
+
+        self.vcodec_label = tk.Label(self.video_details_frame, text="Codec:")
+        self.vcodec_label.grid(row=4, column=0, sticky='e', padx=5, pady=2)
+        self.vcodec_value = tk.Label(self.video_details_frame, text="")
+        self.vcodec_value.grid(row=4, column=1, sticky='w', padx=5, pady=2)
+
+        self.audio_details_frame = ttk.LabelFrame(self.root, text="Audio details")
+        self.audio_details_frame.grid(row=7, column=2, columnspan=2, padx=5, pady=5, sticky="ew")
+        self.audio_details_frame.grid_columnconfigure(1, weight=1)
+
+        self.asize_label = tk.Label(self.audio_details_frame, text="Size:")
+        self.asize_label.grid(row=0, column=0, sticky='e', padx=5, pady=2)
+        self.asize_value = tk.Label(self.audio_details_frame, text="")
+        self.asize_value.grid(row=0, column=1, sticky='w', padx=5, pady=2)
+
+        self.abitrate_label = tk.Label(self.audio_details_frame, text="Bitrate:")
+        self.abitrate_label.grid(row=1, column=0, sticky='e', padx=5, pady=2)
+        self.abitrate_value = tk.Label(self.audio_details_frame, text="")
+        self.abitrate_value.grid(row=1, column=1, sticky='w', padx=5, pady=2)
+
+        self.acodec_label = tk.Label(self.audio_details_frame, text="Codec:")
+        self.acodec_label.grid(row=2, column=0, sticky='e', padx=5, pady=2)
+        self.acodec_value = tk.Label(self.audio_details_frame, text="")
+        self.acodec_value.grid(row=2, column=1, sticky='w', padx=5, pady=2)
+
+        self.video_info_frame = ttk.LabelFrame(self.root, text="Video Information")
+        self.video_info_frame.grid(row=8, column=0, columnspan=4, padx=5, pady=5, sticky="ew")
+        self.video_info_frame.grid_columnconfigure(1, weight=1)
+
+        self.title_label = tk.Label(self.video_info_frame, text="Title:")
+        self.title_label.grid(row=0, column=0, sticky='e', padx=5, pady=2)
+        self.title_value = tk.Label(self.video_info_frame, text="", wraplength=300)
+        self.title_value.grid(row=0, column=1, sticky='w', padx=5, pady=2)
+
+        self.duration_label = tk.Label(self.video_info_frame, text="Duration:")
+        self.duration_label.grid(row=1, column=0, sticky='e', padx=5, pady=2)
+        self.duration_value = tk.Label(self.video_info_frame, text="")
+        self.duration_value.grid(row=1, column=1, sticky='w', padx=5, pady=2)
+
+        self.release_label = tk.Label(self.video_info_frame, text="Release Time:")
+        self.release_label.grid(row=2, column=0, sticky='e', padx=5, pady=2)
+        self.release_value = tk.Label(self.video_info_frame, text="")
+        self.release_value.grid(row=2, column=1, sticky='w', padx=5, pady=2)
+
+        self.thumbnail_label = tk.Label(self.video_info_frame, text="Thumbnail:")
+        self.thumbnail_label.grid(row=3, column=0, sticky='e', padx=5, pady=2)
+        self.thumbnail_canvas = tk.Canvas(self.video_info_frame, width=320, height=180)
+        self.thumbnail_canvas.grid(row=3, column=1, sticky='w', padx=5, pady=2)
+
+    def browse_folder(self):
+        folder_selected = filedialog.askdirectory()
+        if folder_selected:
+            self.path_entry.config(state='normal')
+            self.path_entry.delete(0, tk.END)
+            self.path_entry.insert(0, folder_selected)
+            self.path_entry.config(state='readonly')
+
+    def create_about_window(self):
+        messagebox.showinfo("About", "Youtube Downloader using Tkinter")
+
+    def check_url(self):
+        self.check_button.config(state='disabled')
+
+        def check_url_thread():
+            try:
+                video = Video(url)
+                fetched_info(video)
+            except Exception as e:
+                self.check_button.config(state='normal')
+                messagebox.showerror("Error", f"An error occurred: {e}")
+                print(traceback.format_exc())
+
+        def fetched_info(video):
+            self.video_formats = video.get_video_formats()
+            self.audio_formats = video.get_audio_formats()
+
+            self.video_combo['values'] = [
+                f"{fmt['Resolution']} | {convert_file_size(fmt['FPS'])} FPS | {fmt['VCodec']} | {fmt['Size']}" for fmt
+                in self.video_formats]
+            self.audio_combo['values'] = [
+                f"{fmt['TBR']} TBR | {fmt['ACodec']} | {fmt['Size']}" for fmt
+                in self.audio_formats]
+
+            self.video_combo.current(0)
+            self.audio_combo.current(0)
+
+            self.update_video_info()
+            self.update_audio_info()
+            self.display_video_information(video)
+
+            self.check_button.config(state='normal')
+            self.download_button.config(state='normal')
+
+        url = self.url_entry.get()
+        if not url:
+            self.check_button.config(state='normal')
+            messagebox.showerror("Error", "Please enter a valid YouTube URL")
+            return
+
+        thread = Thread(target=check_url_thread)
+        thread.start()
+
+    def update_video_info(self, event=None):
+        selected_index = self.video_combo.current()
+        if selected_index >= 0:
+            selected_format = self.video_formats[selected_index]
+            self.resolution_value.config(text=selected_format['Resolution'])
+            self.framerate_value.config(text=selected_format['FPS'])
+            self.vsize_value.config(text=selected_format['Size'])
+            self.vbitrate_value.config(text=selected_format['TBR'])
+            self.vcodec_value.config(text=selected_format['VCodec'])
+            self.video_id = selected_format['ID']
+
+    def update_audio_info(self, event=None):
+        selected_index = self.audio_combo.current()
+        if selected_index >= 0:
+            selected_format = self.audio_formats[selected_index]
+            self.asize_value.config(text=selected_format['Size'])
+            self.abitrate_value.config(text=selected_format['TBR'])
+            self.acodec_value.config(text=selected_format['ACodec'])
+            self.audio_id = selected_format['ID']
+
+    def display_video_information(self, video):
+        video_information = video.video_details()
+        self.title_value.config(text=video_information['title'])
+        self.duration_value.config(text=video_information['duration'])
+        self.release_value.config(text=video_information['timestamp'])
+
+        thumbnail_url = video_information['thumbnail']
+        image = Image.open(urllib.request.urlretrieve(thumbnail_url)[0])
+        image = image.resize((320, 180))
+        photo = ImageTk.PhotoImage(image)
+        self.thumbnail_canvas.create_image(0, 0, anchor=tk.NW, image=photo)
+        self.thumbnail_canvas.image = photo
+
+    def download(self):
+        def progress_hook(d):
+            if d['status'] == 'finished':
+                self.progress_bar['value'] = 100
+                self.check_button.config(state='normal')
+                self.download_button.config(state='normal')
+                self.status_label.config(text="100%")
+            elif d['status'] == 'downloading':
+                total_bytes = d['total_bytes'] if d.get('total_bytes') \
+                    else d['total_bytes_estimate'] \
+                    if d.get('total_bytes_estimate') else None
+                downloaded_bytes = d['downloaded_bytes'] if d.get('downloaded_bytes') else None
+                percentage = round(downloaded_bytes / total_bytes * 100) if total_bytes else 0
+                percentage_str = f"{percentage}%" if percentage else None
+                speed = convert_file_size(d['speed']) + "/s" if d.get('speed') else None
+                stats = " | ".join([str(_) for _ in [speed, percentage_str] if _])
+                self.status_label.config(text=stats)
+
+                self.progress_bar['value'] = percentage
+            elif d['status'] == 'error':
+                self.check_button.config(state='normal')
+                self.download_button.config(state='normal')
+                self.status_label.config(text="Error")
+                messagebox.showerror("Error", "An error occurred!")
+
+        url = self.url_entry.get()
+        path = self.path_entry.get()
+        threads = self.threads_entry.get()
+        video_format = self.video_id
+        audio_format = self.audio_id
+
+        if not url or not path or not threads or not video_format or not audio_format:
+            messagebox.showerror("Error", "Please fill all the fields")
+            return
+
+        try:
+            threads = int(threads)
+        except ValueError:
+            messagebox.showerror("Error", "Threads must be a number")
+            return
+
+        self.download_button.config(state='disabled')
+
+        def download_thread():
+            video = Video(url)
+            video.download(video_format, audio_format, path, progress_hook)
+            self.download_complete()
+
+        Thread(target=download_thread).start()
+
+    def download_complete(self):
+        self.download_button.config(state='normal')
+        messagebox.showinfo("Download Complete", "The video has been downloaded successfully")
 
 
-def fetch_video_info(url):
-    video = Video(url)
-    if video.status != 'Success':
-        main_window.write_event_value('-FORMATS-', (None, video.status, None))
-    else:
-        vfs = video.get_video_formats()
-        vfs = {name: value for name, value in zip(video_format_to_str(vfs), vfs)}
-        afs = video.get_audio_formats()
-        afs = {name: value for name, value in zip(audio_format_to_str(afs), afs)}
-        main_window.write_event_value('-FORMATS-', (vfs, afs, video.video_details()))
-
-
-def video_format_to_str(vfs):
-    # resolution | FPS | VCodec | Size
-    return [f"{f['Resolution']} | {f['FPS']} FPS | {f['VCodec']} | {f['Size']}" for f in vfs]
-
-
-def audio_format_to_str(afs):
-    # TBR | ACodec | Size
-    return [f"{f['TBR']} TBR | {f['ACodec']} | {f['Size']}" for f in afs]
-
-
-def update_info_boxes(mode):
-    if mode == 'video':
-        video_dic = {'-RESOLUTION-': 'Resolution', '-FRAMERATE-': 'FPS', '-VCODEC-': 'VCodec', '-VBITRATE-': 'TBR',
-                     '-VSIZE-': 'Size'}
-        for key, value in video_dic.items():
-            main_window[key].update(value=video_formats[values['-VIDEO-']][value])
-        return video_formats[values['-VIDEO-']]['ID']
-    elif mode == 'audio':
-        audio_dic = {'-ABITRATE-': 'TBR', '-ACODEC-': 'ACodec', '-ASIZE-': 'Size'}
-        for key, value in audio_dic.items():
-            main_window[key].update(value=audio_formats[values['-AUDIO-']][value])
-        return audio_formats[values['-AUDIO-']]['ID']
-
-
-def download_video(video_id, audio_id, path, progress_hook, threads):
-    video = Video(url)
-    video.threads = threads
-    try:
-        video.download(video_id, audio_id, path, progress_hook)
-    except Exception as e:
-        main_window.write_event_value('-DOWNLOAD-', f"Download Failed: {e}")
-
-
-def progress_hook(d):
-    if d['status'] == 'finished':
-        main_window['-PROGRESS-'].update(current_count=100)
-        main_window.write_event_value('-DOWNLOAD-', 'Success')
-        main_window['Check'].update(disabled=False)
-        main_window['Download'].update(disabled=False)
-        main_window['-STATUS-'].update(value="Done!")
-    elif d['status'] == 'downloading':
-        total_bytes = d['total_bytes'] if d.get('total_bytes') \
-            else d['total_bytes_estimate'] \
-            if d.get('total_bytes_estimate') else None
-        downloaded_bytes = d['downloaded_bytes'] if d.get('downloaded_bytes') else None
-        percentage = round(downloaded_bytes / total_bytes * 100) if total_bytes else None
-        percentage_str = f"{percentage}%" if percentage else None
-        speed = convert_file_size(d['speed']) + "/s" if d.get('speed') else None
-        main_window['-PROGRESS-'].update(current_count=percentage)
-        stats = " | ".join([str(_) for _ in [speed, percentage_str] if _])
-        main_window['-STATUS-'].update(value=stats)
-    elif d['status'] == 'error':
-        main_window['-PROGRESS-'].update(current_count=0)
-        main_window.write_event_value('-DOWNLOAD-', "Download Failed!")
-        main_window['-STATUS-'].update(value="Error!")
-
-
-layouts = Layout()
-
-video_formats = {}
-audio_formats = {}
-video_id = audio_id = None
-program_status = 'idle'
-downloaded_parts = 0
-
-# Create the window
-main_window = sg.Window('EasyYoutubeDownloader', layouts.main_window_layout, finalize=True)
-
-# Create the 'about' window
-about_window = None
-
-# Event loop
-while True:
-    window, event, values = sg.read_all_windows()
-    if window == main_window:
-        if event in [sg.WINDOW_CLOSED, '-ESCAPE-', 'Exit']:
-            break
-        elif event == 'Check':
-            url = values['-URL-']
-            if url:
-                threading.Thread(target=fetch_video_info, args=(url,), daemon=True).start()
-                main_window['Check'].update(disabled=True)
-        # get the selected video and audio format on change
-        elif event == '-VIDEO-' or event == '-AUDIO-':
-            if event == '-VIDEO-':
-                video_id = update_info_boxes('video')
-            elif event == '-AUDIO-':
-                audio_id = update_info_boxes('audio')
-
-            if video_id and audio_id:
-                main_window['Download'].update(disabled=False)
-        elif event == '-FORMATS-':
-            video_formats, audio_formats, video_details = values['-FORMATS-']
-            if video_formats is None:
-                sg.popup_error(f'\n{audio_formats}\n')
-                continue
-            if video_formats and audio_formats:
-                main_window['Check'].update(disabled=False)
-                window['-VIDEO-'].update(values=list(video_formats.keys()), disabled=False, )
-                window['-AUDIO-'].update(values=list(audio_formats.keys()), disabled=False, )
-
-                window['-TITLE-'].update(textwrap.fill(video_details['title']))
-                window['-DURATION-'].update(value=video_details['duration'])
-                window['-RELEASE-'].update(value=video_details['timestamp'])
-                img = Image.open(urllib.request.urlretrieve(video_details['thumbnail'])[0])
-                img.thumbnail((300, 200))
-                window['-THUMBNAIL-'].update(data=ImageTk.PhotoImage(img))
-            else:
-                sg.popup_error("Failed to fetch formats")
-        elif event == 'Download':
-            url = values['-URL-']
-            threads = int(values['-THREADS-'])
-            download_path = values['-PATH-']
-            if url and video_id and audio_id and download_path and threads > 0:
-                threading.Thread(target=download_video,
-                                 args=(video_id, audio_id, download_path, progress_hook, threads),
-                                 daemon=True).start()
-                if program_status == 'idle':
-                    main_window['Check'].update(disabled=True)
-                    main_window['Download'].update(disabled=True)
-                    program_status = 'downloading'
-            else:
-                sg.popup_error("Please enter valid inputs")
-        elif event == '-DOWNLOAD-':
-            result = values['-DOWNLOAD-']
-            if result != 'Success':
-                sg.popup_error(result)
-                main_window['Check'].update(disabled=False)
-                main_window['Download'].update(disabled=False)
-                downloaded_parts = 0
-            if downloaded_parts == 2:
-                main_window['Check'].update(disabled=False)
-                main_window['Download'].update(disabled=False)
-                program_status = 'idle'
-                downloaded_parts = 0
-        elif event == 'About':
-            if not about_window:
-                about_window = create_about_window()
-                about_window.bring_to_front()
-                about_window.TKroot.focus_force()
-
-    elif window == about_window:
-        if event in [sg.WINDOW_CLOSED, '-ESCAPE-']:
-            about_window.close()
-            about_window = None
-
-if about_window:
-    about_window.close()
-window.close()
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = YoutubeDownloaderApp(root)
+    root.mainloop()
