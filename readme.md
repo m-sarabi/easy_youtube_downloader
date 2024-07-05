@@ -23,6 +23,18 @@ EasyYoutubeDownloader is a user-friendly desktop application built with Tkinter 
 - Convert audio to desired format using ffmpeg
 
 ## Screenshots
+<table>
+  <tr>
+    <td>
+      
+![image](https://github.com/m-sarabi/easy_youtube_downloader/assets/74133927/b2128c0c-9cb7-4a35-9bba-9345020b5136)
+    </td>
+    <td>
+    
+![image](https://github.com/m-sarabi/easy_youtube_downloader/assets/74133927/d9a66a67-a39f-4484-bb74-e9aa9c390926)
+    </td>
+  </tr>
+</table>
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
