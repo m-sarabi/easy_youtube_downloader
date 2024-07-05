@@ -1,6 +1,6 @@
 # EasyYoutubeDownloader
 
-EasyYoutubeDownloader is a user-friendly desktop application built with Tkinter for downloading videos and audio from YouTube. The application allows users to choose various video and audio formats, specify the number of download threads, and select a download location on their system. 
+Easy Youtube Downloader is a user-friendly desktop application built with Tkinter for downloading videos and audio from YouTube. The application allows users to choose various video and audio formats, specify the number of download threads, and select a download location on their system. 
 
 ## Features
 - **Check YouTube URL:** Verify the validity of the YouTube URL and fetch available video and audio formats.
