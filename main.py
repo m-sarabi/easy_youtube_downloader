@@ -207,13 +207,20 @@ For updates, check the GitHub page.
 
     def check_url(self):
         self.check_button.config(state='disabled')
+        self.progress_bar.config(mode="indeterminate")
+        self.progress_bar.start()
+
+        def check_url_done():
+            self.progress_bar.stop()
+            self.check_button.config(state='normal')
+            self.progress_bar.config(mode="determinate")
 
         def check_url_thread():
             try:
                 video = Video(url)
                 fetched_info(video)
             except Exception as e:
-                self.check_button.config(state='normal')
+                check_url_done()
                 messagebox.showerror("Error", f"An error occurred: {e}")
                 print(traceback.format_exc())
 
@@ -235,7 +242,7 @@ For updates, check the GitHub page.
             self.update_audio_info()
             self.display_video_information(video)
 
-            self.check_button.config(state='normal')
+            check_url_done()
             self.download_button.config(state='normal')
 
         url = self.url_entry.get()
