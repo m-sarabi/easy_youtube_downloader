@@ -1,4 +1,3 @@
-import io
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from threading import Thread
@@ -23,11 +22,6 @@ class YoutubeDownloaderApp:
         self.downloaded_parts = 0
 
         # Create the main layout
-        self.create_main_layout()
-
-        self.root.bind('<Button-1>', self.focus_out)
-
-    def create_main_layout(self):
         menu = tk.Menu(self.root)
         self.root.config(menu=menu)
 
@@ -159,6 +153,9 @@ class YoutubeDownloaderApp:
         self.thumbnail_canvas = tk.Canvas(self.video_info_frame, width=320, height=180)
         self.thumbnail_canvas.grid(row=3, column=1, sticky='w', padx=5, pady=2)
 
+        # Bind events
+        self.root.bind('<Button-1>', self.focus_out)
+
     def browse_folder(self):
         folder_selected = filedialog.askdirectory()
         if folder_selected:
@@ -253,7 +250,7 @@ For updates, check the GitHub page.
         thread = Thread(target=check_url_thread)
         thread.start()
 
-    def update_video_info(self, event=None):
+    def update_video_info(self, _=None):
         selected_index = self.video_combo.current()
         if selected_index >= 0:
             selected_format = self.video_formats[selected_index]
@@ -264,7 +261,7 @@ For updates, check the GitHub page.
             self.vcodec_value.config(text=selected_format['VCodec'])
             self.video_id = selected_format['ID']
 
-    def update_audio_info(self, event=None):
+    def update_audio_info(self, _=None):
         selected_index = self.audio_combo.current()
         if selected_index >= 0:
             selected_format = self.audio_formats[selected_index]
@@ -368,7 +365,11 @@ For updates, check the GitHub page.
             self.root.focus_set()
 
 
-if __name__ == "__main__":
+def main():
     root = tk.Tk()
-    app = YoutubeDownloaderApp(root)
+    YoutubeDownloaderApp(root)
     root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
