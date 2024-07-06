@@ -24,6 +24,7 @@ class YoutubeDownloaderApp:
         # Create the main layout
         menu = tk.Menu(self.root)
         self.root.config(menu=menu)
+        self.root.config(padx=10)
 
         file_menu = tk.Menu(menu, tearoff=0)
         menu.add_cascade(label="File", menu=file_menu)
@@ -66,18 +67,18 @@ class YoutubeDownloaderApp:
         self.path_button = ttk.Button(self.root, text="Browse", command=self.browse_folder)
         self.path_button.grid(row=4, column=2, padx=5, pady=5)
 
-        self.download_label = ttk.Label(self.root, text="Download:")
-        self.download_label.grid(row=5, column=0, sticky='e', padx=5, pady=5)
+        # self.download_label = ttk.Label(self.root, text="Download:")
+        # self.download_label.grid(row=5, column=0, sticky='e', padx=5, pady=5)
         self.download_button = ttk.Button(self.root, text="Download", command=self.download, state='disabled')
-        self.download_button.grid(row=5, column=1, padx=5, pady=5, sticky='w')
+        self.download_button.grid(row=5, column=0, columnspan=3, padx=5, pady=5)
 
         self.progress_bar = ttk.Progressbar(self.root, orient='horizontal', length=300, mode='determinate')
-        self.progress_bar.grid(row=5, column=2, padx=5, pady=5)
+        self.progress_bar.grid(row=6, column=0, columnspan=3, padx=5, pady=5)
         self.status_label = ttk.Label(self.root, text="")
-        self.status_label.grid(row=6, column=2, padx=5, pady=5)
+        self.status_label.grid(row=7, column=0, columnspan=3, padx=5, pady=5)
 
         self.details_frame = ttk.Frame(self.root)
-        self.details_frame.grid(row=7, column=0, columnspan=3, padx=5, pady=5, sticky="ew")
+        self.details_frame.grid(row=8, column=0, columnspan=3, padx=5, pady=5, sticky="ew")
         self.details_frame.grid_columnconfigure((0, 1), weight=1)
         self.details_frame.grid_rowconfigure((0, 1), weight=1)
 
@@ -130,12 +131,12 @@ class YoutubeDownloaderApp:
         self.acodec_value.grid(row=2, column=1, sticky='w', padx=5, pady=2)
 
         self.video_info_frame = ttk.LabelFrame(self.root, text="Video Information")
-        self.video_info_frame.grid(row=8, column=0, columnspan=4, padx=5, pady=5, sticky="ew")
+        self.video_info_frame.grid(row=9, column=0, columnspan=4, padx=5, pady=5, sticky="ew")
         self.video_info_frame.grid_columnconfigure(1, weight=1)
 
         self.title_label = ttk.Label(self.video_info_frame, text="Title:")
         self.title_label.grid(row=0, column=0, sticky='e', padx=5, pady=2)
-        self.title_value = ttk.Label(self.video_info_frame, text="")
+        self.title_value = ttk.Label(self.video_info_frame, text="", wraplength=400)
         self.title_value.grid(row=0, column=1, sticky='w', padx=5, pady=2)
 
         self.duration_label = ttk.Label(self.video_info_frame, text="Duration:")
@@ -225,7 +226,7 @@ For updates, check the GitHub page.
             self.audio_formats = video.get_audio_formats()
 
             self.video_combo['values'] = [
-                f"{fmt['Resolution']} | {convert_file_size(fmt['FPS'])} FPS | {fmt['VCodec']} | {fmt['Size']}" for fmt
+                f"{fmt['Resolution']} | {fmt['FPS']} FPS | {fmt['VCodec']} | {fmt['Size']}" for fmt
                 in self.video_formats]
             self.audio_combo['values'] = [
                 f"{fmt['TBR']} TBR | {fmt['ACodec']} | {fmt['Size']}" for fmt
@@ -351,6 +352,7 @@ For updates, check the GitHub page.
 
     def download_complete(self, result):
         self.download_button.config(state='normal')
+        self.status_label.config(text="")
         self.check_button.config(state='normal')
         self.progress_bar.stop()
         if result is True:
