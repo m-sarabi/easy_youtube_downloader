@@ -1,3 +1,4 @@
+import io
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from threading import Thread
@@ -286,13 +287,20 @@ For updates, check the GitHub page.
         self.thumbnail_canvas.image = photo
 
     def download(self):
+        is_started = [False]
+        self.progress_bar.start()
+
         def progress_hook(d):
             if d['status'] == 'finished':
                 self.progress_bar['value'] = 100
                 self.check_button.config(state='normal')
                 self.download_button.config(state='normal')
                 self.status_label.config(text="100%")
+                self.progress_bar.start()
             elif d['status'] == 'downloading':
+                if not is_started[0]:
+                    self.progress_bar.stop()
+                    is_started[0] = True
                 total_bytes = d['total_bytes'] if d.get('total_bytes') \
                     else d['total_bytes_estimate'] \
                     if d.get('total_bytes_estimate') else None
@@ -333,17 +341,25 @@ For updates, check the GitHub page.
         self.check_button.config(state='disabled')
 
         def download_thread():
-            video = Video(url)
-            video.threads = threads
-            video.download(video_format, audio_format, path, progress_hook)
-            self.download_complete()
+            try:
+                video = Video(url)
+                video.threads = threads
+                video.download(video_format, audio_format, path, progress_hook)
+                self.download_complete(True)
+            except Exception as e:
+                print(e)
+                self.download_complete([False, e])
 
         Thread(target=download_thread).start()
 
-    def download_complete(self):
+    def download_complete(self, result):
         self.download_button.config(state='normal')
         self.check_button.config(state='normal')
-        messagebox.showinfo("Download Complete", "The video has been downloaded successfully")
+        self.progress_bar.stop()
+        if result is True:
+            messagebox.showinfo("Download Complete", "The video has been downloaded successfully")
+        else:
+            messagebox.showerror("Error", f"An error occurred: {result[1]}")
 
     def focus_out(self, event):
         widget = event.widget
