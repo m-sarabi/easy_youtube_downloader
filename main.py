@@ -336,7 +336,6 @@ For updates, check the GitHub page.
 
     def focus_out(self, event):
         widget = event.widget
-        print(widget.winfo_class())
         # if clicked on the root or on any frame widget
         if widget.winfo_class() in ['Tk', 'Label', 'TLabelframe', 'TProgressbar', 'Canvas']:
             self.root.focus_set()
