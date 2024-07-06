@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, simpledialog
+from tkinter import ttk, filedialog, messagebox
 from threading import Thread
 from PIL import Image, ImageTk
 import urllib.request
@@ -23,6 +23,8 @@ class YoutubeDownloaderApp:
 
         # Create the main layout
         self.create_main_layout()
+
+        self.root.bind('<Button-1>', self.focus_out)
 
     def create_main_layout(self):
         menu = tk.Menu(self.root)
@@ -331,6 +333,13 @@ For updates, check the GitHub page.
         self.download_button.config(state='normal')
         self.check_button.config(state='normal')
         messagebox.showinfo("Download Complete", "The video has been downloaded successfully")
+
+    def focus_out(self, event):
+        widget = event.widget
+        print(widget.winfo_class())
+        # if clicked on the root or on any frame widget
+        if widget.winfo_class() in ['Tk', 'Label', 'TLabelframe', 'TProgressbar', 'Canvas']:
+            self.root.focus_set()
 
 
 if __name__ == "__main__":
