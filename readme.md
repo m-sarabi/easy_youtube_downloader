@@ -21,6 +21,8 @@ Easy Youtube Downloader is a user-friendly desktop application built with Tkinte
 ## Planned Features
 - Download audio only
 - Convert audio to desired format using ffmpeg
+- Download a playlist
+- Modern Interface
 
 ## Screenshots
 <table>
