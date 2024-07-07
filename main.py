@@ -187,7 +187,7 @@ Made by Mohammad Sarabi.
 GitHub: https://github.com/m-sarabi
 Telegram: @MSarabi
 Version:
-- Version 1.0 (first release, may have bugs)
+- Version 1.2.0
 For updates, check the GitHub page.
         """.strip()
         about_desc_label = tk.Label(about_window, text=about_text, justify='left', wraplength=250, padx=5, pady=5)
@@ -285,20 +285,22 @@ For updates, check the GitHub page.
         self.thumbnail_canvas.image = photo
 
     def download(self):
-        is_started = [False]
+        is_started = False
         self.progress_bar.start()
 
         def progress_hook(d):
+            nonlocal is_started
             if d['status'] == 'finished':
                 self.progress_bar['value'] = 100
                 self.check_button.config(state='normal')
                 self.download_button.config(state='normal')
                 self.status_label.config(text="100%")
                 self.progress_bar.start()
+                is_started = False
             elif d['status'] == 'downloading':
-                if not is_started[0]:
+                if not is_started:
                     self.progress_bar.stop()
-                    is_started[0] = True
+                    is_started = True
                 total_bytes = d['total_bytes'] if d.get('total_bytes') \
                     else d['total_bytes_estimate'] \
                     if d.get('total_bytes_estimate') else None
