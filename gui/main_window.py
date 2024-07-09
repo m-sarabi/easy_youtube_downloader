@@ -1,6 +1,8 @@
+import math
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
+from idlelib.tooltip import Hovertip
 
 
 class MainWindow:
@@ -77,16 +79,17 @@ class MainWindow:
             border_width=2,
             corner_radius=10,
             fg_color="#f02524",
-            width=200, height=300,
+            width=250, height=350,
         )
-        self.formats_frame.place(x=-200, y=100)
+        self.formats_frame.place(x=-250, y=100)
+        self.tooltip = Hovertip(self.formats_frame, 'ID: %')
 
         self.video_details_frame = ctk.CTkFrame(
             master=self.main_frame,
             border_width=2,
             corner_radius=10,
             fg_color="#f02524",
-            width=200, height=300,
+            width=250, height=350,
         )
         self.video_details_frame.place(x=1280, y=100)
 
@@ -94,28 +97,31 @@ class MainWindow:
 
     # These two methods are for testing rn
     def start_animation(self):
-        print('animated')
-        self.animate_move(self.formats_frame, 220, 0, 600)
-        self.animate_move(self.video_details_frame, -220, 0, 600)
+        self.animate_move_x(self.formats_frame, 260, 1000)
+        self.animate_move_x(self.video_details_frame, -260, 1000)
 
-    def animate_move(self, widget, dx, dy, duration):
+    def animate_move_x(self, widget, dx, duration):
         dt = int(1000 / 60)
-        steps = (dx * dt / duration, dy * dt / duration)
         count = duration // dt
+        step = 0
         x0 = widget.winfo_x()
         y0 = widget.winfo_y()
-        pos = [x0, y0]
+
+        def easing_function(t, mode='linear'):
+            if mode == 'linear':
+                return dx / duration * t
+            elif mode == 'ease-out':
+                return dx * math.sin(math.pi * t / (2 * duration))
 
         def move():
-            nonlocal count
-            count -= 1
-            pos[0] += steps[0]
-            pos[1] += steps[1]
-            widget.place(x=round(pos[0]), y=round(pos[1]))
-            if count > 0:
+            nonlocal step
+            step += 1
+            if step <= count:
+                pos = easing_function(step * dt, 'ease-out')
+                widget.place(x=x0 + round(pos), y=y0)
                 self.root.after(dt, move)
-            elif count == 0:
-                widget.place(x=x0 + dx, y=y0 + dy)
+            else:
+                widget.place(x=x0 + dx, y=y0)
 
         self.root.after(dt, move)
 
