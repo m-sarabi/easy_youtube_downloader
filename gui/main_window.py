@@ -1,8 +1,7 @@
-import math
 import tkinter as tk
-from tkinter import ttk
 import customtkinter as ctk
 from idlelib.tooltip import Hovertip
+from custom_widgets import ACTkFrame, ACTkLabel
 
 
 class MainWindow:
@@ -11,6 +10,8 @@ class MainWindow:
         self.root.title("EasyYoutubeDownloader")
         self.root.resizable(False, False)
         self.root.geometry("1280x720+20+20")
+        self.is_panel_open = False
+        self.panels_animating = False
 
         self.menu = tk.Menu(self.root)
         self.root.config(menu=self.menu)
@@ -65,7 +66,7 @@ class MainWindow:
         self.get_info_btn = ctk.CTkButton(
             self.actions_frame,
             text="Get Video Data",
-            command=self.start_animation
+            command=self.test_animate
         )
         self.get_info_btn.grid(row=1, column=1, padx=5, pady=10, sticky='e')
 
@@ -74,62 +75,38 @@ class MainWindow:
         self.download_video_btn.grid(row=1, column=2, padx=5, pady=10, sticky='w')
 
         # formats frame
-        self.formats_frame = ctk.CTkFrame(
+        self.formats_frame = ACTkFrame(
             master=self.main_frame,
             border_width=2,
             corner_radius=10,
             fg_color="#f02524",
             width=250, height=350,
+            duration=800, dx=260, dy=0, easing='ease-out'
         )
         self.formats_frame.place(x=-250, y=100)
         self.tooltip = Hovertip(self.formats_frame, 'ID: %')
 
-        self.video_details_frame = ctk.CTkFrame(
+        self.video_details_frame = ACTkFrame(
             master=self.main_frame,
             border_width=2,
             corner_radius=10,
             fg_color="#f02524",
             width=250, height=350,
+            duration=800, dx=-260, dy=0, easing='ease-out'
         )
         self.video_details_frame.place(x=1280, y=100)
 
         self._bind_events()
-
-    # These two methods are for testing rn
-    def start_animation(self):
-        self.animate_move_x(self.formats_frame, 260, 1000)
-        self.animate_move_x(self.video_details_frame, -260, 1000)
-
-    def animate_move_x(self, widget, dx, duration):
-        dt = int(1000 / 60)
-        count = duration // dt
-        step = 0
-        x0 = widget.winfo_x()
-        y0 = widget.winfo_y()
-
-        def easing_function(t, mode='linear'):
-            if mode == 'linear':
-                return dx / duration * t
-            elif mode == 'ease-out':
-                return dx * math.sin(math.pi * t / (2 * duration))
-
-        def move():
-            nonlocal step
-            step += 1
-            if step <= count:
-                pos = easing_function(step * dt, 'ease-out')
-                widget.place(x=x0 + round(pos), y=y0)
-                self.root.after(dt, move)
-            else:
-                widget.place(x=x0 + dx, y=y0)
-
-        self.root.after(dt, move)
 
     def _bind_events(self):
         pass
 
     def create_about_window(self):
         pass
+
+    def test_animate(self):
+        self.formats_frame.animate()
+        self.video_details_frame.animate()
 
 
 if __name__ == "__main__":
