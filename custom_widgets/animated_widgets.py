@@ -41,7 +41,6 @@ class AnimatedWidget(PlaceableWidget):
         def move():
             self.is_animating = True
             t = time() * 1000 - start_time
-            print(t)
             if t < self.duration:
                 pos = easing_function(t, self.easing)
                 self.place(x=x0 + pos[0], y=y0 + pos[1])
