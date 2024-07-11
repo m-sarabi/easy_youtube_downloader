@@ -9,6 +9,16 @@ def generate_random_string(length):
     return ''.join(random.choice(letters) for i in range(length))
 
 
+def _remove_duplicates(dict_list):
+    unique_dicts = []
+    seen = set()
+    for f in dict_list:
+        if (i := frozenset(list(f.items())[1:])) not in seen:
+            unique_dicts.append(f)
+            seen.add(i)
+    return unique_dicts
+
+
 class Video:
     def __init__(self, url):
         self.url = url
@@ -62,7 +72,7 @@ class Video:
                 'TBR': f.get('tbr'),
                 'ACodec': f.get('acodec'),
             })
-        return formats
+        return _remove_duplicates(formats)
 
     def get_video_formats(self):
         raw_formats = [f for f in self.get_formats() if
@@ -80,7 +90,7 @@ class Video:
                          if f.get('filesize')
                          else f"≈ {approximate_filesize(f.get('tbr'), self.info_dict.get('duration'))}"),
             })
-        return formats
+        return _remove_duplicates(formats)
 
     # download video with given video and audio ids
     def download(self, video_id, audio_id, path='./', progress_hook=None):
