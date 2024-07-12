@@ -10,6 +10,10 @@ class MainWindow:
         self.root.title("EasyYoutubeDownloader")
         self.root.resizable(False, False)
         self.root.geometry("1280x720+20+20")
+
+        # select theme
+        ctk.set_appearance_mode("dark")
+
         self.is_panel_open = False
         self.panels_animating = False
 
