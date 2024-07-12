@@ -50,9 +50,13 @@ class MainWindow:
                                         wraplength=600)
         self.video_title.grid(row=0, column=0, sticky='s', pady=20)
 
+        # get the background color of the preview frame
+        self.bg_color = self.preview_frame.cget("fg_color")[1]
+
         # canvas for showing the thumbnail
         self.thumbnail_canvas = ctk.CTkCanvas(self.preview_frame, width=384, height=216)
         self.thumbnail_canvas.grid(row=1, column=0, sticky='n')
+        self.thumbnail_canvas.configure(bg=self.bg_color, highlightthickness=0)
         self.loading = LoadingAnimation(self.thumbnail_canvas, '../assets/logo_frames', 600)
 
         # for inputs and buttons and so on
