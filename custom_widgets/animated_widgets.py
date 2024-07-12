@@ -1,7 +1,10 @@
 import math
 from time import time
 from typing import Protocol, Any
+import tkinter as tk
 import customtkinter as ctk
+import pathlib
+from PIL import Image, ImageTk
 
 
 class PlaceableWidget(Protocol):
@@ -62,3 +65,56 @@ class ACTkLabel(ctk.CTkLabel, AnimatedWidget):
     def __init__(self, *args, duration, dx, dy, easing='linear', **kwargs):
         ctk.CTkLabel.__init__(self, *args, **kwargs)
         AnimatedWidget.__init__(self, duration, dx, dy, easing)
+
+
+class LoadingAnimation:
+    def __init__(self, canvas: ctk.CTkCanvas, frames_path, duration):
+        self.canvas = canvas
+        self.frames_path = frames_path
+        self.duration = duration
+        self.current_frame = 0
+        self.is_animating = False
+        self.size = (100, 100)
+        self.frames = self._load_frames()
+
+    def _load_frames(self):
+        frames = []
+        for i in range(12):
+            name = pathlib.Path(self.frames_path).joinpath(f"logo_{i + 1:02}.png")
+            frame = Image.open(name)
+            frame = frame.resize(self.size)
+            frames.append(ImageTk.PhotoImage(frame))
+        return frames
+
+    def animate(self):
+        if not self.is_animating:
+            return
+        self.canvas.delete('all')
+        self.canvas.create_image(0, 0, image=self.frames[self.current_frame], anchor='nw')
+        self.current_frame = (self.current_frame + 1) % len(self.frames)
+        self.canvas.after(self.duration // 12, self.animate)
+
+    def stop(self):
+        if self.is_animating:
+            self.is_animating = False
+            self._reset()
+
+    def start(self):
+        if not self.is_animating:
+            self.is_animating = True
+            self.animate()
+
+    def _reset(self):
+        self.current_frame = 0
+        self.canvas.delete('all')
+
+
+if __name__ == '__main__':
+    app = ctk.CTk()
+
+    canvas = ctk.CTkCanvas()
+    canvas.pack()
+    animation = LoadingAnimation(canvas, "../assets/logo_frames", 600)
+    animation.start()
+
+    app.mainloop()

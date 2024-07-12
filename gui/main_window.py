@@ -1,7 +1,7 @@
 import tkinter as tk
 import customtkinter as ctk
 from idlelib.tooltip import Hovertip
-from custom_widgets import ACTkFrame, ACTkLabel
+from custom_widgets import ACTkFrame, ACTkLabel, LoadingAnimation
 
 
 class MainWindow:
@@ -49,6 +49,7 @@ class MainWindow:
         # canvas for showing the thumbnail
         self.thumbnail_canvas = ctk.CTkCanvas(self.preview_frame, width=384, height=216)
         self.thumbnail_canvas.grid(row=1, column=0, sticky='n')
+        self.loading = LoadingAnimation(self.thumbnail_canvas, '../assets/logo_frames', 600)
 
         # for inputs and buttons and so on
         self.actions_frame = ctk.CTkFrame(master=self.main_frame)
@@ -105,8 +106,7 @@ class MainWindow:
         pass
 
     def test_animate(self):
-        self.formats_frame.animate()
-        self.video_details_frame.animate()
+        pass
 
 
 if __name__ == "__main__":
