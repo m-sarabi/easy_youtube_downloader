@@ -77,11 +77,25 @@ class MainWindow:
             text="Get Video Data",
             command=self.test_animate
         )
-        self.get_info_btn.grid(row=1, column=1, padx=5, pady=10, sticky='e')
+        self.get_info_btn.grid(row=1, column=1, padx=5, pady=10, sticky='ne')
 
         # this button is for downloading the video with the selected formats
         self.download_video_btn = ctk.CTkButton(self.actions_frame, text="Download Video", state=tk.DISABLED)
-        self.download_video_btn.grid(row=1, column=2, padx=5, pady=10, sticky='w')
+        self.download_video_btn.grid(row=1, column=2, padx=5, pady=10, sticky='nw')
+
+        # select video format combo box
+        self.video_format_combo = ctk.CTkComboBox(self.actions_frame, values=['-Video Format-'], state='readonly')
+        self.video_format_combo.set(self.video_format_combo.cget('values')[0])
+        self.video_format_combo.grid(row=2, column=1, padx=5, pady=20)
+
+        # select audio format combo box
+        self.audio_format_combo = ctk.CTkComboBox(self.actions_frame, values=['-Audio Format-'], state='readonly')
+        self.audio_format_combo.set(self.audio_format_combo.cget('values')[0])
+        self.audio_format_combo.grid(row=2, column=1, columnspan=2, padx=5, pady=20)
+
+        # audio only checkbox
+        self.audio_only_checkbox = ctk.CTkCheckBox(self.actions_frame, text="Audio Only", command=self.on_audio_check)
+        self.audio_only_checkbox.grid(row=2, column=2, padx=5, pady=20)
 
         # formats frame
         self.formats_frame = ACTkFrame(
@@ -112,6 +126,13 @@ class MainWindow:
 
     def create_about_window(self):
         pass
+
+    def on_audio_check(self):
+        print(self.audio_only_checkbox.get())
+        if self.audio_only_checkbox.get():
+            self.video_format_combo.configure(state=tk.DISABLED)
+        else:
+            self.video_format_combo.configure(state='readonly')
 
     def test_animate(self):
         pass
